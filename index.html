@@ -379,21 +379,25 @@ function WeddingMovieShindan() {
                     React.createElement("strong", null, totalCount.toLocaleString()),
                     " \u4EBA\u306E\u82B1\u5AC1\u3055\u307E\u304C\u8A3A\u65AD\u3057\u307E\u3057\u305F")),
                 React.createElement("p", { style: styles.introLead },
-                    "\u300C\u81EA\u4F5C\uFF1F\u5916\u6CE8\uFF1F\u66F2\u306F\u3069\u3046\u3059\u308B\uFF1F\u300D",
-                    React.createElement("br", null),
-                    "\u8FF7\u3048\u308B\u82B1\u5AC1\u3055\u307E\u306E\u305F\u3081\u306E\u3001",
-                    React.createElement("br", null),
-                    "6\u554F\u30FB30\u79D2\u8A3A\u65AD\u3002"),
-                React.createElement("p", { style: styles.introSub },
                     "\u3042\u306A\u305F\u306B\u3074\u3063\u305F\u308A\u306E",
+                    React.createElement("br", null),
+                    "\u30E0\u30FC\u30D3\u30FC\u306E\u4F5C\u308A\u65B9\u3001",
+                    React.createElement("br", null),
+                    "30\u79D2\u3067\u308F\u304B\u308A\u307E\u3059\u3002"),
+                React.createElement("p", { style: styles.introSub },
+                    "\u300C\u81EA\u4F5C\uFF1F\u5916\u6CE8\uFF1F\u66F2\u306F\u3069\u3046\u3059\u308B\uFF1F\u300D\u2500\u2500\u8FF7\u3048\u308B\u82B1\u5AC1\u3055\u307E\u3078\u3002 6\u3064\u306E\u8CEA\u554F\u306B\u7B54\u3048\u308B\u3060\u3051\u3067\u3001",
                     React.createElement("strong", null, "\u5236\u4F5C\u65B9\u6CD5"),
                     "\u3068",
                     React.createElement("strong", null, "BGM\u306E\u9078\u3073\u65B9"),
-                    "\u3092\u3001\u5143\u5F0F\u5834\u30B9\u30BF\u30C3\u30D5\u306E\u76EE\u7DDA\u3067\u8A3A\u65AD\u3057\u307E\u3059\u3002"),
+                    "\u3092\u5143\u5F0F\u5834\u30B9\u30BF\u30C3\u30D5\u306E\u76EE\u7DDA\u3067\u3054\u63D0\u6848\u3057\u307E\u3059\u3002"),
+                React.createElement("div", { style: styles.trustChipRow },
+                    React.createElement("span", { style: styles.trustChip }, "\u7121\u6599"),
+                    React.createElement("span", { style: styles.trustChip }, "\u767B\u9332\u4E0D\u8981"),
+                    React.createElement("span", { style: styles.trustChip }, "\u51686\u554F\u30FB30\u79D2")),
                 React.createElement("button", { className: "mainBtn", onClick: () => {
                         setStep(0);
                         scrollTop();
-                    } }, "\u8A3A\u65AD\u3092\u306F\u3058\u3081\u308B"))),
+                    } }, "\u8A3A\u65AD\u3092\u306F\u3058\u3081\u308B \u2192"))),
             step >= 0 && !done && (React.createElement("div", { className: fading ? "fadeOut" : "fadeIn", key: step, style: styles.card },
                 React.createElement("div", { style: styles.progressWrap },
                     step > 0 ? (React.createElement("button", { className: "backBtn", onClick: goBack, "aria-label": "\u524D\u306E\u8CEA\u554F\u306B\u623B\u308B" }, "\u2190 \u623B\u308B")) : (React.createElement("span", { style: styles.backSpacer })),
@@ -402,10 +406,7 @@ function WeddingMovieShindan() {
                                 ...styles.progressFill,
                                 width: `${(step / total) * 100}%`,
                             } })),
-                    React.createElement("span", { style: styles.progressText },
-                        step + 1,
-                        " / ",
-                        total)),
+                    React.createElement("span", { style: styles.progressText }, step + 1 === total ? "最後の質問" : `あと${total - step}問`)),
                 React.createElement("p", { style: styles.qLabel }, QUESTIONS[step].label),
                 React.createElement("h2", { style: styles.qText }, QUESTIONS[step].text),
                 React.createElement("div", { style: styles.optWrap }, QUESTIONS[step].options.map((opt, i) => (React.createElement("button", { key: i, className: "optBtn", onClick: () => pick(opt) },
@@ -518,8 +519,9 @@ button {
 .optBtn {
   display: block; width: 100%; text-align: left;
   background: ${WHITE}; color: ${INK};
-  border: 1px solid #DDD3C4; border-radius: 14px;
-  padding: 15px 18px; font-size: 14.5px; line-height: 1.5;
+  border: 1px solid #DDD3C4; border-radius: 16px;
+  padding: 18px 20px; font-size: 15px; line-height: 1.55;
+  min-height: 58px;
   font-family: 'Noto Sans JP', sans-serif; font-weight: 500;
   cursor: pointer; transition: border-color .15s, background .15s, transform .1s;
 }
@@ -705,6 +707,22 @@ const styles = {
         padding: "7px 14px",
         margin: "0 0 20px",
         fontWeight: 500,
+    },
+    trustChipRow: {
+        display: "flex",
+        justifyContent: "center",
+        gap: 8,
+        marginTop: 18,
+    },
+    trustChip: {
+        fontSize: 11.5,
+        color: "#6E6058",
+        background: CREAM,
+        border: `1px solid ${BLUSH}`,
+        borderRadius: 999,
+        padding: "5px 13px",
+        fontWeight: 600,
+        letterSpacing: ".04em",
     },
     introLead: {
         fontFamily: "'Shippori Mincho', serif",
