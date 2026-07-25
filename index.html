@@ -4,43 +4,32 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>プロフィールムービー診断 | Muse Movie</title>
-<meta name="description" content="自作？外注？曲はどうする？迷える花嫁さまのための、6問・30秒でわかる結婚式プロフィールムービーの作り方診断。" />
-
+<meta name="description" content="自作？外注？写真は何枚？いつから作る？プロフィールムービーの迷いを、6問・30秒で解決。費用と時間の目安、式場に確認すべきことまでわかります。" />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="プロフィールムービー診断 | Muse Movie" />
-<meta property="og:description" content="自作？外注？曲はどうする？迷える花嫁さまのための、6問・30秒診断。" />
+<meta property="og:description" content="自作？外注？写真は何枚？6問・30秒であなたに合う進め方がわかります。" />
 <meta property="og:locale" content="ja_JP" />
 <meta name="twitter:card" content="summary_large_image" />
-
 <link rel="icon" href="data:," />
-
 <style>
   html, body { margin: 0; padding: 0; background:#EBE9EA; }
-  #boot-error {
-    display:none; font-family: sans-serif; padding: 32px 20px; color:#34251F;
-    max-width: 480px; margin: 0 auto; line-height:1.8; white-space: pre-wrap;
-  }
+  #boot-error { display:none; font-family: sans-serif; padding: 32px 20px; color:#34251F;
+    max-width: 480px; margin: 0 auto; line-height:1.8; white-space: pre-wrap; }
 </style>
 </head>
 <body>
 <div id="root"></div>
 <div id="boot-error"></div>
-
 <script>
   window.addEventListener('error', function (e) {
     var box = document.getElementById('boot-error');
     if (!box) return;
     box.style.display = 'block';
-    box.textContent =
-      '読み込みでエラーが発生しました。\n\n' +
-      '(このメッセージのスクリーンショットを開発者に送ってください)\n\n' +
-      (e.message || e.error || '不明なエラー');
+    box.textContent = '読み込みでエラーが発生しました。\n\n(このメッセージのスクリーンショットを開発者に送ってください)\n\n' + (e.message || e.error || '不明なエラー');
   });
 </script>
-
 <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
-
 <script>
 try {
   var useState = React.useState;
@@ -258,6 +247,72 @@ const MUSE_PITCH = {
         ],
     },
 };
+const CHECKLIST = [
+    {
+        q: "そもそも持ち込みできる？費用は？",
+        a: "式場によっては持ち込み自体がNGなことも。可能な場合も、DVD持ち込み料3,000円前後、プロジェクター使用料1〜2万円などがかかるケースがあります。",
+    },
+    {
+        q: "いつまでに提出？",
+        a: "式の2週間前までの提出を求められることが多いです。自作なら制作に1ヶ月以上みて、2ヶ月前には動き出すと安心。",
+    },
+    {
+        q: "画面の比率は？（16:9 / 4:3）",
+        a: "会場のスクリーンに合わない比率で作ると、上下左右が黒帯になったり見切れたりします。作りはじめる前に必ず確認を。",
+    },
+    {
+        q: "データ形式はどれ？",
+        a: "mp4・mov などのデータ納品か、DVD-Rに焼くのか。DVDの場合はDVD-RWだと再生できない機器もあるので要注意です。",
+    },
+];
+// 費用と時間の目安（制作方法別）
+const METHOD_COST = {
+    jisaku: {
+        label: "完全自作",
+        min: 0,
+        max: 3000,
+        costNote: "編集アプリは無料でも作れますが、透かし消しや素材の解放でCapCut Pro・Canva Pro（月1,000〜1,500円前後）に課金するケースも。",
+        time: "20〜30時間",
+        timeNote: "写真選び・編集・修正まで含めた目安。週末がまるごと数回分と考えておくと安心です。",
+    },
+    template: {
+        label: "テンプレ自作",
+        min: 3000,
+        max: 6000,
+        costNote: "テンプレート代が3,000〜5,000円ほど。写真を差し替えるだけなので、ゼロから作るより大幅に時短できます。",
+        time: "10〜15時間",
+        timeNote: "写真選びとコメント作成が中心。編集作業そのものは短く済みます。",
+    },
+    gaichu: {
+        label: "外注",
+        min: 18000,
+        max: 30000,
+        costNote: "外部クリエイターへの依頼の相場。式場提携業者だと10〜15万円になることもあります。",
+        time: "3〜5時間",
+        timeNote: "写真を選んでエピソードを書くだけ。あとは待つだけです。",
+    },
+};
+// 費用と時間の目安（BGM別）
+const BGM_COST = {
+    free: {
+        label: "フリーBGM",
+        min: 0,
+        max: 0,
+        note: "著作権フリー音源なら追加費用も申請も不要。曲選びに30分〜1時間ほど。",
+    },
+    shihan: {
+        label: "市販曲",
+        min: 5000,
+        max: 14000,
+        note: "ISUM申請料が1曲5,000〜7,000円程度。2曲構成なら倍かかります。申請の手配はご自身（または式場経由）で。",
+    },
+    orig: {
+        label: "オリジナルBGM",
+        min: 0,
+        max: 0,
+        note: "制作費に含まれる形が一般的。著作権はご自身のものになるので、申請費用は0円です。",
+    },
+};
 const ATELIER_PLECHE = {
     title: "テンプレ自作なら、\nこんな選択肢も",
     body: "写真とコメントを入れるだけで仕上がる、アトリエプルーシュのテンプレート。3,000円台〜と手が届きやすく、卒花レビューも豊富で、テンプレ自作派の花嫁さまから支持されています。",
@@ -379,17 +434,17 @@ function WeddingMovieShindan() {
                     React.createElement("strong", null, totalCount.toLocaleString()),
                     " \u4EBA\u306E\u82B1\u5AC1\u3055\u307E\u304C\u8A3A\u65AD\u3057\u307E\u3057\u305F")),
                 React.createElement("p", { style: styles.introLead },
-                    "\u3042\u306A\u305F\u306B\u3074\u3063\u305F\u308A\u306E",
+                    "\u81EA\u4F5C\uFF1F\u5916\u6CE8\uFF1F",
                     React.createElement("br", null),
-                    "\u30E0\u30FC\u30D3\u30FC\u306E\u4F5C\u308A\u65B9\u3001",
-                    React.createElement("br", null),
-                    "30\u79D2\u3067\u308F\u304B\u308A\u307E\u3059\u3002"),
-                React.createElement("p", { style: styles.introSub },
-                    "\u300C\u81EA\u4F5C\uFF1F\u5916\u6CE8\uFF1F\u66F2\u306F\u3069\u3046\u3059\u308B\uFF1F\u300D\u2500\u2500\u8FF7\u3048\u308B\u82B1\u5AC1\u3055\u307E\u3078\u3002 6\u3064\u306E\u8CEA\u554F\u306B\u7B54\u3048\u308B\u3060\u3051\u3067\u3001",
-                    React.createElement("strong", null, "\u5236\u4F5C\u65B9\u6CD5"),
-                    "\u3068",
-                    React.createElement("strong", null, "BGM\u306E\u9078\u3073\u65B9"),
-                    "\u3092\u5143\u5F0F\u5834\u30B9\u30BF\u30C3\u30D5\u306E\u76EE\u7DDA\u3067\u3054\u63D0\u6848\u3057\u307E\u3059\u3002"),
+                    "\u5199\u771F\u306F\u4F55\u679A\uFF1F\u3044\u3064\u304B\u3089\u4F5C\u308B\uFF1F"),
+                React.createElement("p", { style: styles.introSub }, "\u30D7\u30ED\u30D5\u30A3\u30FC\u30EB\u30E0\u30FC\u30D3\u30FC\u306E\u300C\u308F\u304B\u3089\u306A\u3044\u300D\u3092\u3001 6\u3064\u306E\u8CEA\u554F\u3067\u307E\u308B\u3054\u3068\u89E3\u6C7A\u3002\u5143\u5F0F\u5834\u30B9\u30BF\u30C3\u30D5\u304C\u3001 \u3042\u306A\u305F\u306B\u5408\u3046\u9032\u3081\u65B9\u3092\u3054\u63D0\u6848\u3057\u307E\u3059\u3002"),
+                React.createElement("div", { style: styles.knowBox },
+                    React.createElement("p", { style: styles.knowTitle }, "\u3053\u306E\u8A3A\u65AD\u3067\u308F\u304B\u308B\u3053\u3068"),
+                    React.createElement("ul", { style: styles.knowList },
+                        React.createElement("li", { className: "knowItem", style: styles.knowItem }, "\u81EA\u4F5C\u30FB\u30C6\u30F3\u30D7\u30EC\u30FB\u5916\u6CE8\u3001\u3069\u308C\u304C\u5411\u3044\u3066\u3044\u308B\u304B"),
+                        React.createElement("li", { className: "knowItem", style: styles.knowItem }, "BGM\u306E\u9078\u3073\u65B9\u3068\u3001\u8457\u4F5C\u6A29\u306E\u624B\u7D9A\u304D\u306E\u8981\u4E0D\u8981"),
+                        React.createElement("li", { className: "knowItem", style: styles.knowItem }, "\u304B\u304B\u308B\u8CBB\u7528\u3068\u6642\u9593\u306E\u3001\u30EA\u30A2\u30EB\u306A\u76EE\u5B89"),
+                        React.createElement("li", { className: "knowItem", style: styles.knowItem }, "\u5F0F\u5834\u306B\u78BA\u8A8D\u3059\u3079\u304D4\u3064\u306E\u3053\u3068"))),
                 React.createElement("div", { style: styles.trustChipRow },
                     React.createElement("span", { style: styles.trustChip }, "\u7121\u6599"),
                     React.createElement("span", { style: styles.trustChip }, "\u767B\u9332\u4E0D\u8981"),
@@ -464,6 +519,49 @@ function WeddingMovieShindan() {
                         React.createElement("p", { style: styles.toolName }, tool.name),
                         React.createElement("p", { style: styles.toolDesc }, tool.desc),
                         React.createElement("a", { className: "atelierLink", href: tool.linkUrl, target: "_blank", rel: "noreferrer" }, tool.linkText))))))),
+                (() => {
+                    const mc = METHOD_COST[result.method];
+                    const bc = BGM_COST[result.bgm];
+                    const totalMin = mc.min + bc.min;
+                    const totalMax = mc.max + bc.max;
+                    const yen = (n) => "¥" + n.toLocaleString();
+                    return (React.createElement("div", { style: styles.costCard },
+                        React.createElement("p", { style: styles.costEyebrow }, "\u3042\u306A\u305F\u306E\u5834\u5408\u306E\u76EE\u5B89"),
+                        React.createElement("h3", { style: styles.costTitle }, "\u304B\u304B\u308B\u8CBB\u7528\u3068\u6642\u9593"),
+                        React.createElement("div", { style: styles.costTotalBox },
+                            React.createElement("p", { style: styles.costTotalLabel }, "\u30E0\u30FC\u30D3\u30FC\u5236\u4F5C\u306E\u8CBB\u7528"),
+                            React.createElement("p", { style: styles.costTotalValue }, totalMin === totalMax
+                                ? yen(totalMin)
+                                : `${yen(totalMin)} 〜 ${yen(totalMax)}`),
+                            React.createElement("p", { style: styles.costTotalSub },
+                                mc.label,
+                                bc.min + bc.max > 0 ? ` ＋ ${bc.label}の申請料` : ` ＋ ${bc.label}`)),
+                        React.createElement("div", { style: styles.costRow },
+                            React.createElement("span", { style: styles.costRowLabel }, "\u5236\u4F5C\u8CBB"),
+                            React.createElement("span", { style: styles.costRowValue }, mc.min === mc.max ? yen(mc.min) : `${yen(mc.min)}〜${yen(mc.max)}`)),
+                        React.createElement("p", { style: styles.costRowNote }, mc.costNote),
+                        React.createElement("div", { style: styles.costRow },
+                            React.createElement("span", { style: styles.costRowLabel }, "BGM\u8CBB\u7528"),
+                            React.createElement("span", { style: styles.costRowValue }, bc.min === bc.max ? yen(bc.min) : `${yen(bc.min)}〜${yen(bc.max)}`)),
+                        React.createElement("p", { style: styles.costRowNote }, bc.note),
+                        React.createElement("div", { style: styles.costRow },
+                            React.createElement("span", { style: styles.costRowLabel }, "\u3042\u306A\u305F\u306E\u4F5C\u696D\u6642\u9593"),
+                            React.createElement("span", { style: styles.costRowValue }, mc.time)),
+                        React.createElement("p", { style: styles.costRowNote }, mc.timeNote),
+                        React.createElement("p", { style: styles.costCaution }, "\u203B \u3053\u306E\u307B\u304B\u306B\u3001\u5F0F\u5834\u3067\u306E\u6301\u3061\u8FBC\u307F\u6599\uFF083,000\u5186\u524D\u5F8C\uFF09\u3084\u30D7\u30ED\u30B8\u30A7\u30AF\u30BF\u30FC\u4F7F\u7528\u6599\uFF081\u301C2\u4E07\u5186\uFF09\u304C\u5225\u9014\u304B\u304B\u308B\u5834\u5408\u304C\u3042\u308A\u307E\u3059\u3002")));
+                })(),
+                React.createElement("div", { style: styles.checklistCard },
+                    React.createElement("p", { style: styles.checklistEyebrow }, "\u4F5C\u308A\u306F\u3058\u3081\u308B\u524D\u306B"),
+                    React.createElement("h3", { style: styles.checklistTitle },
+                        "\u5F0F\u5834\u306B\u78BA\u8A8D\u3057\u305F\u3044",
+                        React.createElement("br", null),
+                        "4\u3064\u306E\u3053\u3068"),
+                    React.createElement("p", { style: styles.checklistLead }, "\u81EA\u4F5C\u3067\u3082\u5916\u6CE8\u3067\u3082\u3001\u3053\u3053\u3092\u5148\u306B\u62BC\u3055\u3048\u3066\u304A\u304F\u3068\u4F5C\u308A\u76F4\u3057\u306B\u306A\u308A\u307E\u305B\u3093\u3002 \u62C5\u5F53\u30D7\u30E9\u30F3\u30CA\u30FC\u3055\u3093\u306B\u805E\u3044\u3066\u307F\u3066\u304F\u3060\u3055\u3044\u3002"),
+                    React.createElement("div", { style: styles.checkList }, CHECKLIST.map((item, i) => (React.createElement("div", { key: i, style: styles.checkItem },
+                        React.createElement("span", { style: styles.checkNum }, i + 1),
+                        React.createElement("div", null,
+                            React.createElement("p", { style: styles.checkQ }, item.q),
+                            React.createElement("p", { style: styles.checkA }, item.a))))))),
                 React.createElement("button", { className: "retryBtn", onClick: restart }, "\u3082\u3046\u4E00\u5EA6\u8A3A\u65AD\u3059\u308B"),
                 React.createElement("p", { style: styles.credit },
                     "\u3053\u306E\u8A3A\u65AD\u306F \u7D50\u5A5A\u5F0F\u30E0\u30FC\u30D3\u30FC\u5236\u4F5C Muse Movie \u304C\u4F5C\u6210\u3057\u307E\u3057\u305F",
@@ -503,6 +601,17 @@ button {
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
+}
+
+/* 診断でわかることリストのチェックマーク */
+.knowItem::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: ${GOLD};
+  font-weight: 700;
+  font-size: 12px;
 }
 
 .mainBtn {
@@ -973,6 +1082,185 @@ const styles = {
     toolDesc: {
         fontSize: 12,
         lineHeight: 1.8,
+        color: "#5C554C",
+        margin: 0,
+    },
+    knowBox: {
+        background: CREAM,
+        border: `1px solid ${BLUSH}`,
+        borderRadius: 16,
+        padding: "18px 18px 16px",
+        marginTop: 20,
+    },
+    knowTitle: {
+        fontFamily: "'Shippori Mincho', serif",
+        fontSize: 13.5,
+        fontWeight: 700,
+        color: GOLD,
+        margin: "0 0 12px",
+        letterSpacing: ".08em",
+        textAlign: "center",
+    },
+    knowList: {
+        listStyle: "none",
+        padding: 0,
+        margin: 0,
+        display: "flex",
+        flexDirection: "column",
+        gap: 9,
+    },
+    knowItem: {
+        fontSize: 12.5,
+        lineHeight: 1.65,
+        color: INK,
+        paddingLeft: 20,
+        position: "relative",
+        fontWeight: 500,
+    },
+    costCard: {
+        background: WHITE,
+        borderRadius: 20,
+        padding: "28px 24px 24px",
+        marginTop: 18,
+        border: `1px solid ${BLUSH}`,
+    },
+    costEyebrow: {
+        fontSize: 10.5,
+        letterSpacing: ".3em",
+        color: GOLD,
+        fontWeight: 700,
+        margin: 0,
+    },
+    costTitle: {
+        fontFamily: "'Shippori Mincho', serif",
+        fontSize: 19,
+        fontWeight: 700,
+        margin: "10px 0 18px",
+        color: INK,
+    },
+    costTotalBox: {
+        background: CREAM,
+        borderRadius: 14,
+        padding: "16px 18px",
+        textAlign: "center",
+        marginBottom: 20,
+    },
+    costTotalLabel: {
+        fontSize: 11,
+        color: "#8A8074",
+        margin: "0 0 6px",
+        letterSpacing: ".08em",
+    },
+    costTotalValue: {
+        fontFamily: "'Shippori Mincho', serif",
+        fontSize: 22,
+        fontWeight: 700,
+        color: INK,
+        margin: 0,
+        letterSpacing: ".02em",
+    },
+    costTotalSub: {
+        fontSize: 11,
+        color: GOLD,
+        margin: "6px 0 0",
+        fontWeight: 600,
+    },
+    costRow: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "baseline",
+        borderTop: `1px dashed ${BLUSH}`,
+        paddingTop: 14,
+        marginTop: 4,
+    },
+    costRowLabel: {
+        fontSize: 13,
+        fontWeight: 700,
+        color: INK,
+    },
+    costRowValue: {
+        fontSize: 14,
+        fontWeight: 700,
+        color: GOLD,
+        fontFamily: "'Shippori Mincho', serif",
+    },
+    costRowNote: {
+        fontSize: 11.5,
+        lineHeight: 1.8,
+        color: "#6E6058",
+        margin: "6px 0 14px",
+    },
+    costCaution: {
+        fontSize: 11,
+        lineHeight: 1.75,
+        color: "#8A8074",
+        background: CREAM,
+        borderRadius: 10,
+        padding: "10px 12px",
+        margin: "6px 0 0",
+    },
+    checklistCard: {
+        background: WHITE,
+        borderRadius: 20,
+        padding: "28px 24px 26px",
+        marginTop: 18,
+        border: `1px solid ${BLUSH}`,
+    },
+    checklistEyebrow: {
+        fontSize: 10.5,
+        letterSpacing: ".3em",
+        color: GOLD,
+        fontWeight: 700,
+        margin: 0,
+    },
+    checklistTitle: {
+        fontFamily: "'Shippori Mincho', serif",
+        fontSize: 19,
+        lineHeight: 1.6,
+        fontWeight: 700,
+        margin: "10px 0 12px",
+        color: INK,
+    },
+    checklistLead: {
+        fontSize: 12.5,
+        lineHeight: 1.9,
+        color: "#5C554C",
+        margin: "0 0 20px",
+    },
+    checkList: {
+        display: "flex",
+        flexDirection: "column",
+        gap: 16,
+    },
+    checkItem: {
+        display: "flex",
+        gap: 12,
+        alignItems: "flex-start",
+    },
+    checkNum: {
+        flexShrink: 0,
+        width: 22,
+        height: 22,
+        borderRadius: "50%",
+        border: `1px solid ${GOLD}`,
+        color: GOLD,
+        fontSize: 11.5,
+        fontWeight: 700,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: 2,
+    },
+    checkQ: {
+        fontSize: 13.5,
+        fontWeight: 700,
+        color: INK,
+        margin: "0 0 5px",
+        lineHeight: 1.6,
+    },
+    checkA: {
+        fontSize: 12,
+        lineHeight: 1.85,
         color: "#5C554C",
         margin: 0,
     },
