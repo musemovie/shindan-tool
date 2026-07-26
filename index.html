@@ -313,6 +313,12 @@ const BGM_COST = {
         note: "制作費に含まれる形が一般的。著作権はご自身のものになるので、申請費用は0円です。",
     },
 };
+// Muse Movie の制作費（ココナラ出品価格）
+const MUSE_PRICE = {
+    free: 10000,
+    shihan: 25000,
+    orig: 25000,
+};
 const ATELIER_PLECHE = {
     title: "テンプレ自作なら、\nこんな選択肢も",
     body: "写真とコメントを入れるだけで仕上がる、アトリエプルーシュのテンプレート。3,000円台〜と手が届きやすく、卒花レビューも豊富で、テンプレ自作派の花嫁さまから支持されています。",
@@ -346,6 +352,7 @@ function WeddingMovieShindan() {
     const [step, setStep] = useState(-1); // -1: intro
     const [answers, setAnswers] = useState([]);
     const [fading, setFading] = useState(false);
+    const [showCompare, setShowCompare] = useState(false);
     const [totalCount, setTotalCount] = useState(null);
     const hasSubmitted = useRef(false);
     const total = QUESTIONS.length;
@@ -491,6 +498,74 @@ function WeddingMovieShindan() {
                     React.createElement("h3", { style: styles.sectionH }, "BGM"),
                     React.createElement("p", { style: styles.body }, BGM_RESULTS[result.bgm].desc),
                     React.createElement("p", { style: styles.noteLine }, BGM_RESULTS[result.bgm].note)),
+                (() => {
+                    const mc = METHOD_COST[result.method];
+                    const bc = BGM_COST[result.bgm];
+                    const totalMin = mc.min + bc.min;
+                    const totalMax = mc.max + bc.max;
+                    const yen = (n) => "¥" + n.toLocaleString();
+                    const range = (a, b) => a === b ? yen(a) : `${yen(a)}〜${yen(b)}`;
+                    return (React.createElement("div", { style: styles.costCard },
+                        React.createElement("p", { style: styles.costEyebrow }, "\u3042\u306A\u305F\u306E\u5834\u5408\u306E\u76EE\u5B89"),
+                        React.createElement("h3", { style: styles.costTitle }, "\u304B\u304B\u308B\u8CBB\u7528\u3068\u6642\u9593"),
+                        React.createElement("div", { style: styles.costTotalBox },
+                            React.createElement("p", { style: styles.costTotalLabel }, "\u30E0\u30FC\u30D3\u30FC\u5236\u4F5C\u306E\u8CBB\u7528"),
+                            React.createElement("p", { style: styles.costTotalValue }, totalMin === totalMax
+                                ? yen(totalMin)
+                                : `${yen(totalMin)} 〜 ${yen(totalMax)}`),
+                            React.createElement("p", { style: styles.costTotalSub },
+                                mc.label,
+                                bc.min + bc.max > 0 ? ` ＋ ${bc.label}の申請料` : ` ＋ ${bc.label}`)),
+                        React.createElement("div", { style: styles.costRow },
+                            React.createElement("span", { style: styles.costRowLabel }, "\u5236\u4F5C\u8CBB"),
+                            React.createElement("span", { style: styles.costRowValue }, range(mc.min, mc.max))),
+                        React.createElement("p", { style: styles.costRowNote }, mc.costNote),
+                        React.createElement("div", { style: styles.costRow },
+                            React.createElement("span", { style: styles.costRowLabel }, "BGM\u8CBB\u7528"),
+                            React.createElement("span", { style: styles.costRowValue }, range(bc.min, bc.max))),
+                        React.createElement("p", { style: styles.costRowNote }, bc.note),
+                        React.createElement("div", { style: styles.costRow },
+                            React.createElement("span", { style: styles.costRowLabel }, "\u3042\u306A\u305F\u306E\u4F5C\u696D\u6642\u9593"),
+                            React.createElement("span", { style: styles.costRowValue }, mc.time)),
+                        React.createElement("p", { style: styles.costRowNote }, mc.timeNote),
+                        React.createElement("p", { style: styles.costCaution }, "\u203B \u3053\u306E\u307B\u304B\u306B\u3001\u5F0F\u5834\u3067\u306E\u6301\u3061\u8FBC\u307F\u6599\uFF083,000\u5186\u524D\u5F8C\uFF09\u3084\u30D7\u30ED\u30B8\u30A7\u30AF\u30BF\u30FC\u4F7F\u7528\u6599\uFF081\u301C2\u4E07\u5186\uFF09\u304C\u5225\u9014\u304B\u304B\u308B\u5834\u5408\u304C\u3042\u308A\u307E\u3059\u3002"),
+                        React.createElement("button", { className: "compareToggle", onClick: () => setShowCompare((v) => !v), "aria-expanded": showCompare }, showCompare
+                            ? "比較を閉じる ▲"
+                            : "ほかの作り方とくらべてみる ▼"),
+                        showCompare && (React.createElement("div", { className: "fadeIn", style: styles.compareBox },
+                            React.createElement("p", { style: styles.compareHead }, "\u5236\u4F5C\u65B9\u6CD5\u3079\u3064"),
+                            Object.keys(METHOD_COST).map((k) => {
+                                const m = METHOD_COST[k];
+                                const isMine = k === result.method;
+                                return (React.createElement("div", { key: k, style: {
+                                        ...styles.compareRow,
+                                        ...(isMine ? styles.compareRowMine : {}),
+                                    } },
+                                    React.createElement("span", { style: styles.compareName },
+                                        m.label,
+                                        isMine && React.createElement("span", { style: styles.mineTag }, "\u3042\u306A\u305F")),
+                                    React.createElement("span", { style: styles.compareVal },
+                                        range(m.min, m.max),
+                                        React.createElement("span", { style: styles.compareTime },
+                                            "\uFF0F",
+                                            m.time))));
+                            }),
+                            React.createElement("p", { style: { ...styles.compareHead, marginTop: 18 } }, "BGM\u3079\u3064"),
+                            Object.keys(BGM_COST).map((k) => {
+                                const b = BGM_COST[k];
+                                const isMine = k === result.bgm;
+                                return (React.createElement("div", { key: k, style: {
+                                        ...styles.compareRow,
+                                        ...(isMine ? styles.compareRowMine : {}),
+                                    } },
+                                    React.createElement("span", { style: styles.compareName },
+                                        b.label,
+                                        isMine && React.createElement("span", { style: styles.mineTag }, "\u3042\u306A\u305F")),
+                                    React.createElement("span", { style: styles.compareVal }, b.min === 0 && b.max === 0
+                                        ? "申請費用なし"
+                                        : range(b.min, b.max))));
+                            })))));
+                })(),
                 result.showMuse && (React.createElement("div", { style: styles.museCard },
                     React.createElement("p", { style: styles.museEyebrow }, "\u3042\u306A\u305F\u306B\u304A\u3059\u3059\u3081"),
                     React.createElement("h3", { style: styles.museTitle }, MUSE_PITCH[result.musePitch].title.split("\n").map((line, i) => (React.createElement("span", { key: i },
@@ -498,6 +573,12 @@ function WeddingMovieShindan() {
                         i === 0 && React.createElement("br", null))))),
                     React.createElement("p", { style: styles.museBody }, MUSE_PITCH[result.musePitch].body),
                     React.createElement("ul", { style: styles.museList }, MUSE_PITCH[result.musePitch].bullets.map((b, i) => (React.createElement("li", { key: i, style: styles.museLi }, b)))),
+                    React.createElement("div", { style: styles.musePriceBox },
+                        React.createElement("span", { style: styles.musePriceLabel }, "Muse Movie \u306E\u5236\u4F5C\u8CBB"),
+                        React.createElement("span", { style: styles.musePriceValue },
+                            "\u00A5",
+                            MUSE_PRICE[result.musePitch].toLocaleString(),
+                            React.createElement("span", { style: styles.musePriceTax }, "\u301C"))),
                     React.createElement("a", { className: "museBtn", href: "https://coconala.com/services/3893921", target: "_blank", rel: "noreferrer" }, "\u30B3\u30B3\u30CA\u30E9\u3067\u76F8\u8AC7\u3057\u3066\u307F\u308B\uFF08\u7121\u6599\uFF09"),
                     React.createElement("p", { style: styles.museIg }, "Instagram: @muse.movie.letter"))),
                 result.showAtelier && (React.createElement("div", { style: styles.atelierCard },
@@ -519,37 +600,6 @@ function WeddingMovieShindan() {
                         React.createElement("p", { style: styles.toolName }, tool.name),
                         React.createElement("p", { style: styles.toolDesc }, tool.desc),
                         React.createElement("a", { className: "atelierLink", href: tool.linkUrl, target: "_blank", rel: "noreferrer" }, tool.linkText))))))),
-                (() => {
-                    const mc = METHOD_COST[result.method];
-                    const bc = BGM_COST[result.bgm];
-                    const totalMin = mc.min + bc.min;
-                    const totalMax = mc.max + bc.max;
-                    const yen = (n) => "¥" + n.toLocaleString();
-                    return (React.createElement("div", { style: styles.costCard },
-                        React.createElement("p", { style: styles.costEyebrow }, "\u3042\u306A\u305F\u306E\u5834\u5408\u306E\u76EE\u5B89"),
-                        React.createElement("h3", { style: styles.costTitle }, "\u304B\u304B\u308B\u8CBB\u7528\u3068\u6642\u9593"),
-                        React.createElement("div", { style: styles.costTotalBox },
-                            React.createElement("p", { style: styles.costTotalLabel }, "\u30E0\u30FC\u30D3\u30FC\u5236\u4F5C\u306E\u8CBB\u7528"),
-                            React.createElement("p", { style: styles.costTotalValue }, totalMin === totalMax
-                                ? yen(totalMin)
-                                : `${yen(totalMin)} 〜 ${yen(totalMax)}`),
-                            React.createElement("p", { style: styles.costTotalSub },
-                                mc.label,
-                                bc.min + bc.max > 0 ? ` ＋ ${bc.label}の申請料` : ` ＋ ${bc.label}`)),
-                        React.createElement("div", { style: styles.costRow },
-                            React.createElement("span", { style: styles.costRowLabel }, "\u5236\u4F5C\u8CBB"),
-                            React.createElement("span", { style: styles.costRowValue }, mc.min === mc.max ? yen(mc.min) : `${yen(mc.min)}〜${yen(mc.max)}`)),
-                        React.createElement("p", { style: styles.costRowNote }, mc.costNote),
-                        React.createElement("div", { style: styles.costRow },
-                            React.createElement("span", { style: styles.costRowLabel }, "BGM\u8CBB\u7528"),
-                            React.createElement("span", { style: styles.costRowValue }, bc.min === bc.max ? yen(bc.min) : `${yen(bc.min)}〜${yen(bc.max)}`)),
-                        React.createElement("p", { style: styles.costRowNote }, bc.note),
-                        React.createElement("div", { style: styles.costRow },
-                            React.createElement("span", { style: styles.costRowLabel }, "\u3042\u306A\u305F\u306E\u4F5C\u696D\u6642\u9593"),
-                            React.createElement("span", { style: styles.costRowValue }, mc.time)),
-                        React.createElement("p", { style: styles.costRowNote }, mc.timeNote),
-                        React.createElement("p", { style: styles.costCaution }, "\u203B \u3053\u306E\u307B\u304B\u306B\u3001\u5F0F\u5834\u3067\u306E\u6301\u3061\u8FBC\u307F\u6599\uFF083,000\u5186\u524D\u5F8C\uFF09\u3084\u30D7\u30ED\u30B8\u30A7\u30AF\u30BF\u30FC\u4F7F\u7528\u6599\uFF081\u301C2\u4E07\u5186\uFF09\u304C\u5225\u9014\u304B\u304B\u308B\u5834\u5408\u304C\u3042\u308A\u307E\u3059\u3002")));
-                })(),
                 React.createElement("div", { style: styles.checklistCard },
                     React.createElement("p", { style: styles.checklistEyebrow }, "\u4F5C\u308A\u306F\u3058\u3081\u308B\u524D\u306B"),
                     React.createElement("h3", { style: styles.checklistTitle },
@@ -613,6 +663,16 @@ button {
   font-weight: 700;
   font-size: 12px;
 }
+
+.compareToggle {
+  display: block; width: 100%; margin-top: 16px;
+  background: none; border: 1px solid ${BLUSH}; border-radius: 999px;
+  padding: 11px; font-size: 12.5px; font-weight: 600;
+  font-family: 'Noto Sans JP', sans-serif;
+  color: ${INK}; cursor: pointer; letter-spacing: .04em;
+  transition: background .15s;
+}
+.compareToggle:focus-visible { outline: 2px solid ${GOLD}; outline-offset: 2px; }
 
 .mainBtn {
   display: block; width: 100%; margin-top: 28px;
@@ -687,6 +747,7 @@ button {
   .museBtn:hover { opacity: .88; }
   .atelierLink:hover { opacity: .7; }
   .retryBtn:hover { background: ${INK}; color: ${CREAM}; }
+  .compareToggle:hover { background: ${CREAM}; }
 }
 `;
 const styles = {
@@ -1198,6 +1259,84 @@ const styles = {
         borderRadius: 10,
         padding: "10px 12px",
         margin: "6px 0 0",
+    },
+    compareBox: {
+        marginTop: 14,
+        paddingTop: 4,
+    },
+    compareHead: {
+        fontSize: 11,
+        letterSpacing: ".18em",
+        color: GOLD,
+        fontWeight: 700,
+        margin: "0 0 8px",
+    },
+    compareRow: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "9px 12px",
+        borderRadius: 10,
+        marginBottom: 5,
+        background: CREAM,
+    },
+    compareRowMine: {
+        background: "#F3E7DC",
+        border: `1px solid ${GOLD}`,
+    },
+    compareName: {
+        fontSize: 12.5,
+        fontWeight: 600,
+        color: INK,
+        display: "flex",
+        alignItems: "center",
+        gap: 7,
+    },
+    mineTag: {
+        fontSize: 9.5,
+        background: GOLD,
+        color: "#fff",
+        borderRadius: 999,
+        padding: "2px 7px",
+        fontWeight: 700,
+        letterSpacing: ".04em",
+    },
+    compareVal: {
+        fontSize: 12,
+        fontWeight: 700,
+        color: "#5C554C",
+        textAlign: "right",
+    },
+    compareTime: {
+        fontSize: 10.5,
+        color: "#8A8074",
+        fontWeight: 500,
+    },
+    musePriceBox: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        background: "rgba(255,255,255,.10)",
+        border: "1px solid rgba(213,189,174,.35)",
+        borderRadius: 12,
+        padding: "13px 16px",
+        marginTop: 18,
+    },
+    musePriceLabel: {
+        fontSize: 11.5,
+        color: "#D9CFBE",
+        fontWeight: 600,
+        letterSpacing: ".04em",
+    },
+    musePriceValue: {
+        fontFamily: "'Shippori Mincho', serif",
+        fontSize: 20,
+        fontWeight: 700,
+        color: GOLD,
+    },
+    musePriceTax: {
+        fontSize: 12,
+        marginLeft: 1,
     },
     checklistCard: {
         background: WHITE,
