@@ -313,6 +313,19 @@ const BGM_COST = {
         note: "制作費に含まれる形が一般的。著作権はご自身のものになるので、申請費用は0円です。",
     },
 };
+// オリジナルBGMを選んだ人向け：音を体感してもらうための導線
+const BGM_EXPERIENCE = {
+    eyebrow: "聴いてみませんか",
+    title: "「自分たちだけの曲」って、\nどんな音になるの？",
+    body: "言葉だけではイメージしづらいのが、オリジナルBGMのいちばん難しいところ。ふたりのエピソードが、どんなメロディと歌詞になっていくのか──実際の音で確かめられるミニ体験ページをご用意しました。",
+    points: [
+        "実際に制作したオリジナルBGMを試聴できます",
+        "エピソードが歌詞に変わる流れを体験できます",
+        "所要1〜2分・登録不要",
+    ],
+    linkText: "オリジナルBGMを聴いてみる",
+    linkUrl: "https://musemovie.github.io/originalbgm/",
+};
 // Muse Movie の制作費（ココナラ出品価格）
 const MUSE_PRICE = {
     free: 10000,
@@ -419,13 +432,12 @@ function WeddingMovieShindan() {
                 React.createElement("img", { src: HERO_IMAGE_URL, alt: "", style: styles.coverHeroImg }),
                 React.createElement("div", { style: styles.coverHeroOverlay }),
                 React.createElement("div", { style: styles.coverHeroText },
-                    React.createElement("div", { style: styles.glassChip },
-                        React.createElement("div", { style: styles.brandLine }),
-                        React.createElement("p", { style: styles.brandEyebrow }, "WEDDING MOVIE \u8A3A\u65AD"),
-                        React.createElement("h1", { style: styles.brandTitleOnGlass },
-                            "\u30D7\u30ED\u30D5\u30A3\u30FC\u30EB\u30E0\u30FC\u30D3\u30FC",
-                            React.createElement("br", null),
-                            "\u308F\u305F\u3057\u306B\u5408\u3046\u4F5C\u308A\u65B9\u8A3A\u65AD"))))),
+                    React.createElement("div", { style: styles.brandLine }),
+                    React.createElement("p", { style: styles.brandEyebrow }, "WEDDING MOVIE \u8A3A\u65AD"),
+                    React.createElement("h1", { style: styles.brandTitleOnGlass },
+                        "\u30D7\u30ED\u30D5\u30A3\u30FC\u30EB\u30E0\u30FC\u30D3\u30FC",
+                        React.createElement("br", null),
+                        "\u308F\u305F\u3057\u306B\u5408\u3046\u4F5C\u308A\u65B9\u8A3A\u65AD")))),
             step >= 0 && !done && (React.createElement("header", { style: styles.header },
                 React.createElement("div", { style: styles.headerContent },
                     React.createElement("div", { style: styles.brandLine }),
@@ -566,6 +578,16 @@ function WeddingMovieShindan() {
                                         : range(b.min, b.max))));
                             })))));
                 })(),
+                result.bgm === "orig" && (React.createElement("div", { style: styles.expCard },
+                    React.createElement("p", { style: styles.expEyebrow }, BGM_EXPERIENCE.eyebrow),
+                    React.createElement("h3", { style: styles.expTitle }, BGM_EXPERIENCE.title.split("\n").map((line, i) => (React.createElement("span", { key: i },
+                        line,
+                        i === 0 && React.createElement("br", null))))),
+                    React.createElement("p", { style: styles.expBody }, BGM_EXPERIENCE.body),
+                    React.createElement("ul", { style: styles.expList }, BGM_EXPERIENCE.points.map((pt, i) => (React.createElement("li", { key: i, className: "expItem", style: styles.expItem }, pt)))),
+                    React.createElement("a", { className: "expBtn", href: BGM_EXPERIENCE.linkUrl, target: "_blank", rel: "noreferrer" },
+                        "\u266A ",
+                        BGM_EXPERIENCE.linkText))),
                 result.showMuse && (React.createElement("div", { style: styles.museCard },
                     React.createElement("p", { style: styles.museEyebrow }, "\u3042\u306A\u305F\u306B\u304A\u3059\u3059\u3081"),
                     React.createElement("h3", { style: styles.museTitle }, MUSE_PITCH[result.musePitch].title.split("\n").map((line, i) => (React.createElement("span", { key: i },
@@ -664,6 +686,25 @@ button {
   font-size: 12px;
 }
 
+/* オリジナルBGM体験カード */
+.expItem::before {
+  content: "・";
+  position: absolute;
+  left: 2px;
+  top: 0;
+  color: ${GOLD};
+  font-weight: 700;
+}
+.expBtn {
+  display: block; text-align: center; text-decoration: none;
+  background: ${INK}; color: ${CREAM};
+  border-radius: 999px; padding: 15px;
+  font-size: 14px; font-weight: 700; letter-spacing: .06em;
+  font-family: 'Noto Sans JP', sans-serif;
+  margin-top: 20px; transition: opacity .2s;
+}
+.expBtn:focus-visible { outline: 3px solid ${GOLD}; outline-offset: 2px; }
+
 .compareToggle {
   display: block; width: 100%; margin-top: 16px;
   background: none; border: 1px solid ${BLUSH}; border-radius: 999px;
@@ -748,6 +789,7 @@ button {
   .atelierLink:hover { opacity: .7; }
   .retryBtn:hover { background: ${INK}; color: ${CREAM}; }
   .compareToggle:hover { background: ${CREAM}; }
+  .expBtn:hover { opacity: .85; }
 }
 `;
 const styles = {
@@ -773,7 +815,7 @@ const styles = {
         marginLeft: -16,
         marginRight: -16,
         width: "calc(100% + 32px)",
-        height: 560,
+        height: 440,
         overflow: "hidden",
     },
     coverHeroImg: {
@@ -782,35 +824,25 @@ const styles = {
         width: "100%",
         height: "100%",
         objectFit: "cover",
-        objectPosition: "center 15%",
+        objectPosition: "center 12%",
         display: "block",
     },
     coverHeroOverlay: {
         position: "absolute",
         inset: 0,
-        background: "linear-gradient(180deg, rgba(235,233,234,0) 0%, rgba(235,233,234,.05) 45%, rgba(235,233,234,.55) 78%, rgba(235,233,234,.92) 100%)",
+        background: "linear-gradient(180deg, rgba(235,233,234,0) 0%, rgba(235,233,234,.08) 38%, rgba(235,233,234,.72) 68%, rgba(235,233,234,.97) 90%, #EBE9EA 100%)",
     },
     coverHeroText: {
         position: "absolute",
         left: 0,
         right: 0,
-        bottom: 56,
+        bottom: 18,
         padding: "0 24px",
         textAlign: "center",
     },
-    glassChip: {
-        display: "inline-block",
-        background: "rgba(255,253,249,.55)",
-        backdropFilter: "blur(14px)",
-        WebkitBackdropFilter: "blur(14px)",
-        border: "1px solid rgba(255,255,255,.5)",
-        borderRadius: 22,
-        padding: "22px 26px",
-        boxShadow: "0 8px 32px rgba(52,37,31,.08)",
-    },
     brandTitleOnGlass: {
         fontFamily: "'Shippori Mincho', serif",
-        fontSize: 21,
+        fontSize: 22,
         lineHeight: 1.6,
         fontWeight: 600,
         color: INK,
@@ -1337,6 +1369,49 @@ const styles = {
     musePriceTax: {
         fontSize: 12,
         marginLeft: 1,
+    },
+    expCard: {
+        background: `linear-gradient(160deg, #F6EFE7 0%, ${WHITE} 60%)`,
+        borderRadius: 20,
+        padding: "28px 24px 26px",
+        marginTop: 18,
+        border: `1px solid ${GOLD}`,
+    },
+    expEyebrow: {
+        fontSize: 10.5,
+        letterSpacing: ".3em",
+        color: GOLD,
+        fontWeight: 700,
+        margin: 0,
+    },
+    expTitle: {
+        fontFamily: "'Shippori Mincho', serif",
+        fontSize: 19,
+        lineHeight: 1.6,
+        fontWeight: 700,
+        margin: "10px 0 12px",
+        color: INK,
+    },
+    expBody: {
+        fontSize: 13,
+        lineHeight: 1.95,
+        color: "#4A4038",
+        margin: 0,
+    },
+    expList: {
+        listStyle: "none",
+        padding: 0,
+        margin: "16px 0 0",
+        display: "flex",
+        flexDirection: "column",
+        gap: 8,
+    },
+    expItem: {
+        fontSize: 12,
+        lineHeight: 1.7,
+        color: "#5C554C",
+        paddingLeft: 18,
+        position: "relative",
     },
     checklistCard: {
         background: WHITE,
