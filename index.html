@@ -187,7 +187,7 @@ const BGM_RESULTS = {
         note: "手続き: 不要 ／ 費用: 0円〜数千円",
     },
     shihan: {
-        title: "市販曲（ISUM申請）",
+        title: "市販曲",
         desc: "思い出の曲を使うならISUM登録曲から選ぶのが鉄則。ムービーへの使用は「複製権」の申請が必須で、無断使用は罰則の対象に。申請はご自身（または式場経由）で行います。",
         note: "手続き: ISUM申請必須(お客様ご自身で) ／ 費用: 1曲5千円前後〜",
     },
@@ -216,6 +216,11 @@ function calcResult(answers) {
         bgm = "orig";
     if (s.shihan >= s.free && s.shihan >= s.orig)
         bgm = "shihan";
+    // オリジナルBGMは映像制作とセットでの依頼が前提のため、
+    // 自作・テンプレ判定であっても「外注」に寄せる(矛盾した組み合わせを防ぐ)
+    const bgmForcedOutsource = bgm === "orig" && method !== "gaichu";
+    if (bgmForcedOutsource)
+        method = "gaichu";
     // Muse Movie は「外注」全般（市販曲・オリジナル問わず）と、
     // オリジナル曲を望む全タイプ（自作・テンプレでも作曲だけ依頼できるため）が対象
     const showMuse = method === "gaichu" || bgm === "orig";
@@ -224,7 +229,7 @@ function calcResult(answers) {
     // 完全自作タイプには、編集ツール（Canva・CapCut）を案内
     const showJisakuTools = method === "jisaku" && !showMuse;
     const musePitch = bgm === "orig" ? "orig" : bgm === "shihan" ? "shihan" : "free";
-    return { method, bgm, showMuse, showAtelier, showJisakuTools, musePitch };
+    return { method, bgm, showMuse, showAtelier, showJisakuTools, musePitch, bgmForcedOutsource };
 }
 const MUSE_PITCH = {
     orig: {
@@ -554,6 +559,7 @@ function WeddingMovieShindan() {
                     METHOD_RESULTS[result.method].specs && (React.createElement("div", { style: styles.specStrip }, METHOD_RESULTS[result.method].specs.map((s, i) => (React.createElement("span", { key: i, style: styles.specItem }, s))))),
                     React.createElement("h3", { style: styles.sectionH }, "BGM"),
                     React.createElement("p", { style: styles.body }, BGM_RESULTS[result.bgm].desc),
+                    result.bgmForcedOutsource && (React.createElement("p", { style: styles.forcedNote }, "\u30AA\u30EA\u30B8\u30CA\u30EBBGM\u306F\u3001\u6620\u50CF\u5236\u4F5C\u3068\u3042\u308F\u305B\u3066\u306E\u3054\u4F9D\u983C\u306B\u306A\u308A\u307E\u3059\u3002\u305D\u306E\u305F\u3081\u5236\u4F5C\u65B9\u6CD5\u306F\u300C\u5916\u6CE8\u300D\u3067\u306E\u3054\u63D0\u6848\u3067\u3059\u3002")),
                     React.createElement("p", { style: styles.noteLine }, BGM_RESULTS[result.bgm].note)),
                 (() => {
                     const mc = METHOD_COST[result.method];
@@ -1533,6 +1539,15 @@ const styles = {
         color: "#5C554C",
         paddingLeft: 18,
         position: "relative",
+    },
+    forcedNote: {
+        fontSize: 12,
+        lineHeight: 1.85,
+        color: "#6E6058",
+        background: CREAM,
+        borderRadius: 10,
+        padding: "11px 13px",
+        margin: "12px 0 0",
     },
     specStrip: {
         display: "flex",
