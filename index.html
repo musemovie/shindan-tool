@@ -75,9 +75,10 @@ function jsonpRequest(url, params, onSuccess) {
 }
 const HERO_IMAGE_URL = "./cover.jpeg";
 const RESULT_IMAGES = {
-    jisaku: "./result-jisaku.jpeg",
-    template: "./result-template.jpeg",
-    gaichu: "./result-gaichu.jpeg",
+    // pos = 写真のどの高さを中心に見せるか(下にあるPC・花束が切れないよう個別調整)
+    jisaku: { url: "./result-jisaku.jpeg", pos: "center 45%" },
+    template: { url: "./result-template.jpeg", pos: "center 62%" },
+    gaichu: { url: "./result-gaichu.jpeg", pos: "center 62%" },
 };
 // ─────────────────────────────────────────────
 // Muse Movie プロフィールムービー診断
@@ -89,9 +90,9 @@ const QUESTIONS = [
         label: "Q1",
         text: "結婚式まで、あとどれくらい？",
         options: [
-            { text: "3ヶ月以上ある", pts: { diy: 2 } },
-            { text: "1〜3ヶ月", pts: { diy: 1, out: 1 } },
-            { text: "1ヶ月を切っている…！", pts: { out: 3 } },
+            { text: "3ヶ月以上ある", pts: { diy: 2 }, key: "time_long" },
+            { text: "1〜3ヶ月", pts: { diy: 1, out: 1 }, key: "time_mid" },
+            { text: "1ヶ月を切っている…！", pts: { out: 3 }, key: "time_short" },
         ],
     },
     {
@@ -109,9 +110,9 @@ const QUESTIONS = [
         label: "Q3",
         text: "ムービーにかけられる予算は？",
         options: [
-            { text: "できるだけ0円に近づけたい", pts: { diy: 2, free: 2 } },
-            { text: "〜2万円くらいなら", pts: { out: 1, shihan: 1, orig: 1 } },
-            { text: "3万円以上でも、納得できるなら", pts: { out: 2, orig: 1 } },
+            { text: "できるだけ0円に近づけたい", pts: { diy: 2, free: 2 }, key: "bg_zero" },
+            { text: "〜2万円くらいなら", pts: { out: 1, shihan: 1, orig: 1 }, key: "bg_mid" },
+            { text: "3万円以上でも、納得できるなら", pts: { out: 2, orig: 1 }, key: "bg_high" },
         ],
     },
     {
@@ -129,9 +130,9 @@ const QUESTIONS = [
         label: "Q5",
         text: "ムービーでいちばん大事にしたいのは？",
         options: [
-            { text: "コスパ。かしこく準備したい", pts: { free: 2, diy: 1 } },
-            { text: "おしゃれさ・世界観", pts: { shihan: 1, free: 1 } },
-            { text: "ゲストと家族の涙。とにかく感動", pts: { orig: 2, out: 1 } },
+            { text: "コスパ。かしこく準備したい", pts: { free: 2, diy: 1 }, key: "val_cost" },
+            { text: "おしゃれさ・世界観", pts: { shihan: 1, free: 1 }, key: "val_style" },
+            { text: "ゲストと家族の涙。とにかく感動", pts: { orig: 2, out: 1 }, key: "val_emotion" },
         ],
     },
     {
@@ -143,16 +144,19 @@ const QUESTIONS = [
                 text: "ふたりの思い出の曲や、好きなアーティストの曲を使いたい",
                 sub: "市販曲・J-POPなど",
                 pts: { shihan: 3 },
+                bgmPick: "shihan",
             },
             {
                 text: "特にこだわりはない。雰囲気に合えばOK",
                 sub: "フリー音源でコストを抑えたい",
                 pts: { free: 2 },
+                bgmPick: "free",
             },
             {
                 text: "自分たちだけの曲を作ってみたい",
                 sub: "AI作曲などで、世界に一曲だけのオリジナルBGM",
                 pts: { orig: 3 },
+                bgmPick: "orig",
             },
         ],
     },
@@ -209,13 +213,10 @@ function calcResult(answers) {
         method = "jisaku";
     else
         method = "template";
-    let bgm = "shihan";
-    if (s.free >= s.shihan && s.free > s.orig)
-        bgm = "free";
-    if (s.orig > s.shihan && s.orig > s.free)
-        bgm = "orig";
-    if (s.shihan >= s.free && s.shihan >= s.orig)
-        bgm = "shihan";
+    // BGMは「Q6でご本人が明示的に選んだ答え」をそのまま採用する。
+    // (予算やこだわりの回答で、本人の希望が上書きされないようにするため)
+    const picked = answers.find((a) => a.bgmPick);
+    let bgm = picked ? picked.bgmPick : "free";
     // オリジナルBGMは映像制作とセットでの依頼が前提のため、
     // 自作・テンプレ判定であっても「外注」に寄せる(矛盾した組み合わせを防ぐ)
     const bgmForcedOutsource = bgm === "orig" && method !== "gaichu";
@@ -229,7 +230,8 @@ function calcResult(answers) {
     // 完全自作タイプには、編集ツール（Canva・CapCut）を案内
     const showJisakuTools = method === "jisaku" && !showMuse;
     const musePitch = bgm === "orig" ? "orig" : bgm === "shihan" ? "shihan" : "free";
-    return { method, bgm, showMuse, showAtelier, showJisakuTools, musePitch, bgmForcedOutsource };
+    const advice = buildAdvice(answers, method, bgm);
+    return { method, bgm, showMuse, showAtelier, showJisakuTools, musePitch, bgmForcedOutsource, advice };
 }
 const MUSE_PITCH = {
     orig: {
@@ -278,6 +280,87 @@ const CHECKLIST = [
         a: "mp4・mov などのデータ納品か、DVD-Rに焼くのか。DVDの場合はDVD-RWだと再生できない機器もあるので要注意です。",
     },
 ];
+// 回答の組み合わせから、その人だけのアドバイスを組み立てる
+function buildAdvice(answers, method, bgm) {
+    const keys = answers.map((a) => a.key).filter(Boolean);
+    const has = (k) => keys.includes(k);
+    const list = [];
+    // ① 予算と希望のギャップを正直に伝える(最優先)
+    if (bgm === "orig" && has("bg_zero")) {
+        list.push({
+            type: "alert",
+            title: "予算とのギャップがあります",
+            body: "「できるだけ0円に」というご希望に対し、オリジナルBGM付きの制作は25,000円前後かかります。曲へのこだわりを優先するか、フリーBGM＋外注（10,000円〜）に切り替えるか、ここが分かれ道です。",
+        });
+    }
+    else if (bgm === "orig" && has("bg_mid")) {
+        list.push({
+            type: "alert",
+            title: "予算より少し上になります",
+            body: "ご予算2万円に対し、オリジナルBGM付きは25,000円前後。差額は5,000円ほどです。フリーBGMなら10,000円〜に抑えられます。",
+        });
+    }
+    // ② 納期
+    if (has("time_short")) {
+        list.push({
+            type: "alert",
+            title: "スケジュールが切迫しています",
+            body: "式場への提出は2週間前が一般的なので、制作にかけられるのは実質2週間ほど。特急対応が可能か、まず確認しましょう。写真選びを今日から始めるのが最優先です。",
+        });
+    }
+    else if (has("time_mid")) {
+        list.push({
+            type: "info",
+            title: "標準的なスケジュールです",
+            body: "今から動けば余裕を持って間に合います。まず写真選びから始めて、式の2週間前の提出に間に合うよう逆算しておきましょう。",
+        });
+    }
+    else if (has("time_long")) {
+        list.push({
+            type: "info",
+            title: "時間の余裕を活かせます",
+            body: "焦る必要はありません。この期間を使って、写真選びとエピソードの整理をじっくり進めましょう。良いムービーは素材集めで決まります。",
+        });
+    }
+    // ③ 重視するもの × 選んだBGM
+    if (has("val_emotion") && bgm === "orig") {
+        list.push({
+            type: "info",
+            title: "その選択、相性抜群です",
+            body: "「ゲストと家族の涙」を重視するなら、ふたりのエピソードから作るオリジナル曲は最も効果的な演出です。歌詞に名前やエピソードが出てくる瞬間、会場の空気が変わります。",
+        });
+    }
+    else if (has("val_emotion") && bgm !== "orig") {
+        list.push({
+            type: "info",
+            title: "感動を高めたいなら",
+            body: "選曲がすべてを左右します。歌詞の内容が写真の流れと重なる曲を選ぶと、ぐっと涙腺に効きます。テンポの速い曲より、静かなバラードのほうが効果的です。",
+        });
+    }
+    else if (has("val_style")) {
+        list.push({
+            type: "info",
+            title: "世界観を統一しましょう",
+            body: "フォント・色味・BGMのトーンを揃えるのが、おしゃれに見せる最大のコツです。写真の色調も、加工アプリで統一しておくと一気にまとまります。",
+        });
+    }
+    else if (has("val_cost") && method !== "gaichu") {
+        list.push({
+            type: "info",
+            title: "かしこく抑えるコツ",
+            body: "無料テンプレートとフリーBGMを使えば、実質0円でも十分きれいに仕上がります。ただし式場の持ち込み料は別途かかるので、そこだけ先に確認を。",
+        });
+    }
+    // ④ スキルと選択のギャップ
+    if (method === "jisaku" && has("time_short")) {
+        list.push({
+            type: "alert",
+            title: "自作は間に合わない可能性も",
+            body: "編集には20〜30時間かかります。1ヶ月を切っている状況では、テンプレート利用か外注への切り替えも検討したほうが安全です。",
+        });
+    }
+    return list.slice(0, 3);
+}
 // 費用と時間の目安（制作方法別）
 const METHOD_COST = {
     jisaku: {
@@ -436,9 +519,17 @@ function WeddingMovieShindan() {
             document.body.scrollTop = 0;
         });
     };
+    const stopAudio = () => {
+        const a = audioRef.current;
+        if (a && !a.paused) {
+            a.pause();
+            setPlaying(false);
+        }
+    };
     const pick = (opt) => {
         if (fading)
             return;
+        stopAudio();
         setFading(true);
         setTimeout(() => {
             setAnswers((prev) => [...prev, opt]);
@@ -450,6 +541,7 @@ function WeddingMovieShindan() {
     const goBack = () => {
         if (fading || step <= 0)
             return;
+        stopAudio();
         setFading(true);
         setTimeout(() => {
             setAnswers((prev) => prev.slice(0, -1));
@@ -476,6 +568,10 @@ function WeddingMovieShindan() {
     }, [done, result]);
     return (React.createElement("div", { style: styles.root },
         React.createElement("style", null, css),
+        React.createElement("audio", { ref: audioRef, src: "./demo-bgm.mp3", preload: "metadata", onEnded: () => {
+                setPlaying(false);
+                setCurTime(0);
+            }, onPause: () => setPlaying(false), onTimeUpdate: (e) => setCurTime(e.target.currentTime), onLoadedMetadata: (e) => setDur(e.target.duration) }),
         React.createElement("div", { style: styles.frame },
             step === -1 && (React.createElement("header", { style: styles.coverHero },
                 React.createElement("img", { src: HERO_IMAGE_URL, alt: "", style: styles.coverHeroImg }),
@@ -534,10 +630,23 @@ function WeddingMovieShindan() {
                 React.createElement("h2", { style: styles.qText }, QUESTIONS[step].text),
                 React.createElement("div", { style: styles.optWrap }, QUESTIONS[step].options.map((opt, i) => (React.createElement("button", { key: i, className: "optBtn", onClick: () => pick(opt) },
                     React.createElement("span", { style: styles.optMain }, opt.text),
-                    opt.sub && React.createElement("span", { style: styles.optSub }, opt.sub))))))),
+                    opt.sub && React.createElement("span", { style: styles.optSub }, opt.sub))))),
+                QUESTIONS[step].id === "bgm" && (React.createElement("div", { style: styles.qPlayerBox },
+                    React.createElement("p", { style: styles.qPlayerLead }, "\u266A\u300C\u81EA\u5206\u305F\u3061\u3060\u3051\u306E\u66F2\u300D\u306F\u3001\u3053\u3093\u306A\u97F3\u306B\u306A\u308A\u307E\u3059"),
+                    React.createElement("div", { style: styles.qPlayerRow },
+                        React.createElement("button", { className: "playBtn", onClick: toggleAudio, "aria-label": playing ? "停止" : "試聴する" }, playing ? "❚❚" : "▶"),
+                        React.createElement("div", { style: styles.playerMeta },
+                            React.createElement("input", { className: "seekBar", type: "range", min: 0, max: dur || 90, step: 0.1, value: curTime, onChange: (e) => seekAudio(Number(e.target.value)), "aria-label": "\u518D\u751F\u4F4D\u7F6E" }),
+                            React.createElement("div", { style: styles.timeRow },
+                                React.createElement("span", null, fmtTime(curTime)),
+                                React.createElement("span", null, fmtTime(dur || 90))))),
+                    React.createElement("p", { style: styles.qPlayerNote }, "\u5B9F\u969B\u306B\u304A\u4F5C\u308A\u3057\u305F\u30B5\u30F3\u30D7\u30EB\u3067\u3059\u3002\u97F3\u304C\u51FA\u307E\u3059\u306E\u3067\u3054\u6CE8\u610F\u304F\u3060\u3055\u3044\u3002"))))),
             done && result && (React.createElement("div", { className: "fadeIn" },
                 React.createElement("div", { style: styles.resultHero },
-                    React.createElement("img", { src: RESULT_IMAGES[result.method], alt: "", style: styles.coverHeroImg }),
+                    React.createElement("img", { src: RESULT_IMAGES[result.method].url, alt: "", style: {
+                            ...styles.coverHeroImg,
+                            objectPosition: RESULT_IMAGES[result.method].pos,
+                        } }),
                     React.createElement("div", { style: styles.resultHeroOverlay })),
                 React.createElement("div", { style: { ...styles.karte, ...styles.cardOverlap } },
                     React.createElement("div", { style: styles.karteHeader },
@@ -561,6 +670,19 @@ function WeddingMovieShindan() {
                     React.createElement("p", { style: styles.body }, BGM_RESULTS[result.bgm].desc),
                     result.bgmForcedOutsource && (React.createElement("p", { style: styles.forcedNote }, "\u30AA\u30EA\u30B8\u30CA\u30EBBGM\u306F\u3001\u6620\u50CF\u5236\u4F5C\u3068\u3042\u308F\u305B\u3066\u306E\u3054\u4F9D\u983C\u306B\u306A\u308A\u307E\u3059\u3002\u305D\u306E\u305F\u3081\u5236\u4F5C\u65B9\u6CD5\u306F\u300C\u5916\u6CE8\u300D\u3067\u306E\u3054\u63D0\u6848\u3067\u3059\u3002")),
                     React.createElement("p", { style: styles.noteLine }, BGM_RESULTS[result.bgm].note)),
+                result.advice && result.advice.length > 0 && (React.createElement("div", { style: styles.adviceCard },
+                    React.createElement("p", { style: styles.adviceEyebrow }, "\u3042\u306A\u305F\u3078\u306E\u30A2\u30C9\u30D0\u30A4\u30B9"),
+                    result.advice.map((ad, i) => (React.createElement("div", { key: i, style: {
+                            ...styles.adviceItem,
+                            ...(ad.type === "alert" ? styles.adviceAlert : {}),
+                        } },
+                        React.createElement("p", { style: {
+                                ...styles.adviceTitle,
+                                color: ad.type === "alert" ? "#B5654A" : INK,
+                            } },
+                            ad.type === "alert" ? "！ " : "",
+                            ad.title),
+                        React.createElement("p", { style: styles.adviceBody }, ad.body)))))),
                 (() => {
                     const mc = METHOD_COST[result.method];
                     const bc = BGM_COST[result.bgm];
@@ -642,11 +764,7 @@ function WeddingMovieShindan() {
                             React.createElement("input", { className: "seekBar", type: "range", min: 0, max: dur || 90, step: 0.1, value: curTime, onChange: (e) => seekAudio(Number(e.target.value)), "aria-label": "\u518D\u751F\u4F4D\u7F6E" }),
                             React.createElement("div", { style: styles.timeRow },
                                 React.createElement("span", null, fmtTime(curTime)),
-                                React.createElement("span", null, fmtTime(dur || 90)))),
-                        React.createElement("audio", { ref: audioRef, src: "./demo-bgm.mp3", preload: "metadata", onEnded: () => {
-                                setPlaying(false);
-                                setCurTime(0);
-                            }, onPause: () => setPlaying(false), onTimeUpdate: (e) => setCurTime(e.target.currentTime), onLoadedMetadata: (e) => setDur(e.target.duration) })),
+                                React.createElement("span", null, fmtTime(dur || 90))))),
                     React.createElement("p", { style: styles.playerNote }, "\u203B \u97F3\u304C\u51FA\u307E\u3059\u3002\u30DE\u30CA\u30FC\u30E2\u30FC\u30C9\u3060\u3068\u518D\u751F\u3055\u308C\u306A\u3044\u5834\u5408\u304C\u3042\u308A\u307E\u3059\u3002"),
                     React.createElement("ul", { style: styles.expList }, BGM_EXPERIENCE.points.map((pt, i) => (React.createElement("li", { key: i, className: "expItem", style: styles.expItem }, pt)))),
                     React.createElement("a", { className: "expLink", href: BGM_EXPERIENCE.linkUrl, target: "_blank", rel: "noreferrer" },
@@ -666,7 +784,12 @@ function WeddingMovieShindan() {
                             MUSE_PRICE[result.musePitch].toLocaleString(),
                             React.createElement("span", { style: styles.musePriceTax }, "\u301C"))),
                     React.createElement("a", { className: "museBtn", href: "https://coconala.com/services/3893921", target: "_blank", rel: "noreferrer" }, "\u30B3\u30B3\u30CA\u30E9\u3067\u76F8\u8AC7\u3057\u3066\u307F\u308B\uFF08\u7121\u6599\uFF09"),
-                    React.createElement("p", { style: styles.museIg }, "Instagram: @muse.movie.letter"))),
+                    React.createElement("a", { className: "igLink", href: "https://www.instagram.com/muse_movie_wedding/", target: "_blank", rel: "noreferrer" },
+                        React.createElement("svg", { width: "16", height: "16", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" },
+                            React.createElement("rect", { x: "2", y: "2", width: "20", height: "20", rx: "5", ry: "5" }),
+                            React.createElement("path", { d: "M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" }),
+                            React.createElement("line", { x1: "17.5", y1: "6.5", x2: "17.51", y2: "6.5" })),
+                        React.createElement("span", null, "@muse_movie_wedding")))),
                 result.showAtelier && (React.createElement("div", { style: styles.atelierCard },
                     React.createElement("p", { style: styles.atelierEyebrow }, "\u3042\u308F\u305B\u3066\u30C1\u30A7\u30C3\u30AF"),
                     React.createElement("h3", { style: styles.atelierTitle }, ATELIER_PLECHE.title.split("\n").map((line, i) => (React.createElement("span", { key: i },
@@ -790,6 +913,17 @@ button {
 .playBtn:active { transform: scale(.94); }
 .playBtn:focus-visible { outline: 3px solid ${GOLD}; outline-offset: 2px; }
 
+.igLink {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  text-decoration: none; color: #C4B8A6;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 12px; font-weight: 600; letter-spacing: .04em;
+  margin-top: 16px; padding: 9px;
+  border: 1px solid rgba(213,189,174,.3); border-radius: 999px;
+  transition: color .2s, border-color .2s;
+}
+.igLink:focus-visible { outline: 2px solid ${GOLD}; outline-offset: 2px; }
+
 .expLink {
   display: inline-block; text-decoration: none;
   color: ${INK}; border-bottom: 1px solid ${GOLD};
@@ -886,6 +1020,7 @@ button {
   .compareToggle:hover { background: ${CREAM}; }
   .playBtn:hover { opacity: .85; }
   .expLink:hover { opacity: .7; }
+  .igLink:hover { color: ${GOLD}; border-color: ${GOLD}; }
 }
 `;
 const styles = {
@@ -960,7 +1095,7 @@ const styles = {
         marginLeft: -16,
         marginRight: -16,
         width: "calc(100% + 32px)",
-        height: 360,
+        height: 420,
         overflow: "hidden",
     },
     resultHeroOverlay: {
@@ -1202,13 +1337,6 @@ const styles = {
         gap: 8,
     },
     museLi: { fontSize: 12.5, lineHeight: 1.7, color: "#D9CFBE" },
-    museIg: {
-        textAlign: "center",
-        fontSize: 11.5,
-        color: "#9B927F",
-        marginTop: 14,
-        letterSpacing: ".08em",
-    },
     atelierCard: {
         background: WHITE,
         border: `1px dashed ${GOLD}`,
@@ -1466,6 +1594,31 @@ const styles = {
         fontSize: 12,
         marginLeft: 1,
     },
+    qPlayerBox: {
+        background: `linear-gradient(160deg, #F6EFE7 0%, ${WHITE} 70%)`,
+        border: `1px solid ${GOLD}`,
+        borderRadius: 16,
+        padding: "16px 16px 14px",
+        marginTop: 18,
+    },
+    qPlayerLead: {
+        fontSize: 12.5,
+        fontWeight: 700,
+        color: INK,
+        margin: "0 0 12px",
+        lineHeight: 1.6,
+    },
+    qPlayerRow: {
+        display: "flex",
+        alignItems: "center",
+        gap: 13,
+    },
+    qPlayerNote: {
+        fontSize: 10.5,
+        color: "#8A8074",
+        margin: "10px 0 0",
+        lineHeight: 1.6,
+    },
     playerBox: {
         display: "flex",
         alignItems: "center",
@@ -1539,6 +1692,42 @@ const styles = {
         color: "#5C554C",
         paddingLeft: 18,
         position: "relative",
+    },
+    adviceCard: {
+        background: WHITE,
+        borderRadius: 20,
+        padding: "26px 22px 22px",
+        marginTop: 18,
+        border: `1px solid ${BLUSH}`,
+    },
+    adviceEyebrow: {
+        fontSize: 10.5,
+        letterSpacing: ".3em",
+        color: GOLD,
+        fontWeight: 700,
+        margin: "0 0 16px",
+    },
+    adviceItem: {
+        background: CREAM,
+        borderRadius: 12,
+        padding: "14px 15px",
+        marginBottom: 10,
+    },
+    adviceAlert: {
+        background: "#FAF0EA",
+        border: "1px solid #E5C4B4",
+    },
+    adviceTitle: {
+        fontSize: 13.5,
+        fontWeight: 700,
+        margin: "0 0 6px",
+        lineHeight: 1.5,
+    },
+    adviceBody: {
+        fontSize: 12,
+        lineHeight: 1.9,
+        color: "#5C554C",
+        margin: 0,
     },
     forcedNote: {
         fontSize: 12,
