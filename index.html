@@ -77,8 +77,8 @@ const HERO_IMAGE_URL = "./cover.jpeg";
 const RESULT_IMAGES = {
     // pos = 写真のどの高さを中心に見せるか(下にあるPC・花束が切れないよう個別調整)
     jisaku: { url: "./result-jisaku.jpeg", pos: "center 45%" },
-    template: { url: "./result-template.jpeg", pos: "center 62%" },
-    gaichu: { url: "./result-gaichu.jpeg", pos: "center 62%" },
+    template: { url: "./result-template.jpeg", pos: "center 50%" },
+    gaichu: { url: "./result-gaichu.jpeg", pos: "center 45%" },
 };
 // ─────────────────────────────────────────────
 // Muse Movie プロフィールムービー診断
@@ -411,13 +411,10 @@ const BGM_COST = {
 };
 // オリジナルBGMを選んだ人向け：音を体感してもらうための導線
 const BGM_EXPERIENCE = {
-    eyebrow: "聴いてみませんか",
-    title: "「自分たちだけの曲」って、\nどんな音になるの？",
-    body: "言葉だけではイメージしづらいのが、オリジナルBGMのいちばん難しいところ。実際にお作りした曲を、この場で聴いてみてください。",
-    points: [
-        "ふたりのエピソードから歌詞を書き下ろします",
-        "著作権フリー。申請も追加費用も不要です",
-    ],
+    eyebrow: "もっと知りたい方へ",
+    title: "オリジナルBGMの\nつくり方を見てみる",
+    body: "エピソードがどうやって歌詞になり、曲として仕上がっていくのか。制作の流れを詳しくご紹介しています。",
+    points: [],
     linkText: "オリジナルBGMをもっと詳しく",
     linkUrl: "https://musemovie.github.io/originalbgm/",
 };
@@ -632,7 +629,12 @@ function WeddingMovieShindan() {
                     React.createElement("span", { style: styles.optMain }, opt.text),
                     opt.sub && React.createElement("span", { style: styles.optSub }, opt.sub))))),
                 QUESTIONS[step].id === "bgm" && (React.createElement("div", { style: styles.qPlayerBox },
-                    React.createElement("p", { style: styles.qPlayerLead }, "\u266A\u300C\u81EA\u5206\u305F\u3061\u3060\u3051\u306E\u66F2\u300D\u306F\u3001\u3053\u3093\u306A\u97F3\u306B\u306A\u308A\u307E\u3059"),
+                    React.createElement("p", { style: styles.qPlayerEyebrow }, "\u8074\u3044\u3066\u307F\u307E\u305B\u3093\u304B"),
+                    React.createElement("p", { style: styles.qPlayerLead },
+                        "\u300C\u81EA\u5206\u305F\u3061\u3060\u3051\u306E\u66F2\u300D\u3063\u3066\u3001",
+                        React.createElement("br", null),
+                        "\u3069\u3093\u306A\u97F3\u306B\u306A\u308B\u306E\uFF1F"),
+                    React.createElement("p", { style: styles.qPlayerBody }, "\u3075\u305F\u308A\u306E\u30A8\u30D4\u30BD\u30FC\u30C9\u304B\u3089\u6B4C\u8A5E\u3092\u66F8\u304D\u4E0B\u308D\u3059\u3001\u4E16\u754C\u306B\u3072\u3068\u3064\u3060\u3051\u306EBGM\u3002 \u8457\u4F5C\u6A29\u30D5\u30EA\u30FC\u306A\u306E\u3067\u3001\u7533\u8ACB\u3082\u8FFD\u52A0\u8CBB\u7528\u3082\u4E0D\u8981\u3067\u3059\u3002"),
                     React.createElement("div", { style: styles.qPlayerRow },
                         React.createElement("button", { className: "playBtn", onClick: toggleAudio, "aria-label": playing ? "停止" : "試聴する" }, playing ? "❚❚" : "▶"),
                         React.createElement("div", { style: styles.playerMeta },
@@ -669,20 +671,20 @@ function WeddingMovieShindan() {
                     React.createElement("h3", { style: styles.sectionH }, "BGM"),
                     React.createElement("p", { style: styles.body }, BGM_RESULTS[result.bgm].desc),
                     result.bgmForcedOutsource && (React.createElement("p", { style: styles.forcedNote }, "\u30AA\u30EA\u30B8\u30CA\u30EBBGM\u306F\u3001\u6620\u50CF\u5236\u4F5C\u3068\u3042\u308F\u305B\u3066\u306E\u3054\u4F9D\u983C\u306B\u306A\u308A\u307E\u3059\u3002\u305D\u306E\u305F\u3081\u5236\u4F5C\u65B9\u6CD5\u306F\u300C\u5916\u6CE8\u300D\u3067\u306E\u3054\u63D0\u6848\u3067\u3059\u3002")),
-                    React.createElement("p", { style: styles.noteLine }, BGM_RESULTS[result.bgm].note)),
-                result.advice && result.advice.length > 0 && (React.createElement("div", { style: styles.adviceCard },
-                    React.createElement("p", { style: styles.adviceEyebrow }, "\u3042\u306A\u305F\u3078\u306E\u30A2\u30C9\u30D0\u30A4\u30B9"),
-                    result.advice.map((ad, i) => (React.createElement("div", { key: i, style: {
-                            ...styles.adviceItem,
-                            ...(ad.type === "alert" ? styles.adviceAlert : {}),
-                        } },
-                        React.createElement("p", { style: {
-                                ...styles.adviceTitle,
-                                color: ad.type === "alert" ? "#B5654A" : INK,
+                    React.createElement("p", { style: styles.noteLine }, BGM_RESULTS[result.bgm].note),
+                    result.advice && result.advice.length > 0 && (React.createElement("div", { style: styles.adviceInline },
+                        React.createElement("h3", { style: styles.sectionH }, "\u3042\u306A\u305F\u3078\u306E\u30A2\u30C9\u30D0\u30A4\u30B9"),
+                        result.advice.map((ad, i) => (React.createElement("div", { key: i, style: {
+                                ...styles.adviceItem,
+                                ...(ad.type === "alert" ? styles.adviceAlert : {}),
                             } },
-                            ad.type === "alert" ? "！ " : "",
-                            ad.title),
-                        React.createElement("p", { style: styles.adviceBody }, ad.body)))))),
+                            React.createElement("p", { style: {
+                                    ...styles.adviceTitle,
+                                    color: ad.type === "alert" ? "#B5654A" : INK,
+                                } },
+                                ad.type === "alert" ? "！ " : "",
+                                ad.title),
+                            React.createElement("p", { style: styles.adviceBody }, ad.body))))))),
                 (() => {
                     const mc = METHOD_COST[result.method];
                     const bc = BGM_COST[result.bgm];
@@ -757,15 +759,6 @@ function WeddingMovieShindan() {
                         line,
                         i === 0 && React.createElement("br", null))))),
                     React.createElement("p", { style: styles.expBody }, BGM_EXPERIENCE.body),
-                    React.createElement("div", { style: styles.playerBox },
-                        React.createElement("button", { className: "playBtn", onClick: toggleAudio, "aria-label": playing ? "停止" : "再生" }, playing ? "❚❚" : "▶"),
-                        React.createElement("div", { style: styles.playerMeta },
-                            React.createElement("p", { style: styles.playerTitle }, "\u30AA\u30EA\u30B8\u30CA\u30EBBGM \u30B5\u30F3\u30D7\u30EB"),
-                            React.createElement("input", { className: "seekBar", type: "range", min: 0, max: dur || 90, step: 0.1, value: curTime, onChange: (e) => seekAudio(Number(e.target.value)), "aria-label": "\u518D\u751F\u4F4D\u7F6E" }),
-                            React.createElement("div", { style: styles.timeRow },
-                                React.createElement("span", null, fmtTime(curTime)),
-                                React.createElement("span", null, fmtTime(dur || 90))))),
-                    React.createElement("p", { style: styles.playerNote }, "\u203B \u97F3\u304C\u51FA\u307E\u3059\u3002\u30DE\u30CA\u30FC\u30E2\u30FC\u30C9\u3060\u3068\u518D\u751F\u3055\u308C\u306A\u3044\u5834\u5408\u304C\u3042\u308A\u307E\u3059\u3002"),
                     React.createElement("ul", { style: styles.expList }, BGM_EXPERIENCE.points.map((pt, i) => (React.createElement("li", { key: i, className: "expItem", style: styles.expItem }, pt)))),
                     React.createElement("a", { className: "expLink", href: BGM_EXPERIENCE.linkUrl, target: "_blank", rel: "noreferrer" },
                         BGM_EXPERIENCE.linkText,
@@ -1082,7 +1075,7 @@ const styles = {
     },
     cardOverlap: {
         position: "relative",
-        marginTop: -48,
+        marginTop: -32,
         borderRadius: "26px 26px 20px 20px",
         boxShadow: "0 -6px 28px rgba(52,37,31,.10)",
         background: "rgba(255,253,249,.82)",
@@ -1095,7 +1088,7 @@ const styles = {
         marginLeft: -16,
         marginRight: -16,
         width: "calc(100% + 32px)",
-        height: 420,
+        height: 240,
         overflow: "hidden",
     },
     resultHeroOverlay: {
@@ -1602,11 +1595,25 @@ const styles = {
         marginTop: 18,
     },
     qPlayerLead: {
-        fontSize: 12.5,
+        fontFamily: "'Shippori Mincho', serif",
+        fontSize: 15.5,
         fontWeight: 700,
         color: INK,
-        margin: "0 0 12px",
+        margin: "0 0 10px",
         lineHeight: 1.6,
+    },
+    qPlayerEyebrow: {
+        fontSize: 10,
+        letterSpacing: ".3em",
+        color: GOLD,
+        fontWeight: 700,
+        margin: "0 0 8px",
+    },
+    qPlayerBody: {
+        fontSize: 11.5,
+        lineHeight: 1.85,
+        color: "#5C554C",
+        margin: "0 0 14px",
     },
     qPlayerRow: {
         display: "flex",
@@ -1693,19 +1700,8 @@ const styles = {
         paddingLeft: 18,
         position: "relative",
     },
-    adviceCard: {
-        background: WHITE,
-        borderRadius: 20,
-        padding: "26px 22px 22px",
-        marginTop: 18,
-        border: `1px solid ${BLUSH}`,
-    },
-    adviceEyebrow: {
-        fontSize: 10.5,
-        letterSpacing: ".3em",
-        color: GOLD,
-        fontWeight: 700,
-        margin: "0 0 16px",
+    adviceInline: {
+        marginTop: 4,
     },
     adviceItem: {
         background: CREAM,
